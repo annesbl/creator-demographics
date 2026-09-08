@@ -186,7 +186,7 @@
   /* ---------- stat tiles ---------- */
   .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
     gap: 14px;
   }
 
@@ -279,9 +279,17 @@
   .stat__value {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 26px;
+    font-size: 22px;
+    line-height: 1.2;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    white-space: normal;
+  }
+
+  .stat__value--sm {
+    font-size: 16px;
   }
 
   .stat__sub {
@@ -881,13 +889,13 @@
         value: fmtInt(cs.cancelledTotal),
         sub: '≥ 2× Commission storniert',
       },
-      { label: 'Stärkstes Land', value: topCountry ? topCountry[0] : '–', sub: topCountry ? `${fmtInt(topCountry[1])} Creator` : '' },
+      { label: 'Stärkstes Land', value: topCountry ? topCountry[0] : '–', sub: topCountry ? `${fmtInt(topCountry[1])} Creator` : '', small: true },
     ];
 
     document.getElementById('stats').innerHTML = stats
       .map(
         (s, i) =>
-          `<div class="stat${s.clickable ? ' stat--clickable' : ''}" ${s.clickable ? `id="risingStarsStat"` : ''}><span class="stat__label">${s.label}</span><span class="stat__value">${s.value}</span><span class="stat__sub">${s.sub}</span></div>`
+          `<div class="stat${s.clickable ? ' stat--clickable' : ''}" ${s.clickable ? `id="risingStarsStat"` : ''}><span class="stat__label">${s.label}</span><span class="stat__value${s.small ? ' stat__value--sm' : ''}">${s.value}</span><span class="stat__sub">${s.sub}</span></div>`
       )
       .join('');
 
