@@ -868,7 +868,7 @@
       : 'Gesamter Zeitraum';
 
     const stats = [
-      { label: 'Creator gesamt', value: fmtInt(total), sub: `${monthsCovered} Monate erfasst` },
+      { label: 'Aktive Creator', value: fmtInt(total), sub: `Bewerbungen · ${monthsCovered} ${monthsCovered === 1 ? 'Monat' : 'Monate'} erfasst` },
       {
         label: 'Neue approved Creator',
         value: fmtInt(cs.newApprovedLatest),
