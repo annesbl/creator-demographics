@@ -729,34 +729,44 @@
     color: var(--ink-muted);
     letter-spacing: 0;
   }
-  .range-picker { position: relative; }
-  .range-toggle {
-    all: unset;
+  .period-side {
+    flex: 1 1 260px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+  }
+  .period-cal { flex: 0 1 320px; min-width: 0; }
+  .preset-select { position: relative; display: inline-block; align-self: flex-start; max-width: 100%; }
+  .preset-select::after {
+    content: '▾';
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 11px;
+    color: var(--ink-secondary);
+  }
+  .preset-select select {
+    appearance: none;
+    -webkit-appearance: none;
     cursor: pointer;
-    height: 30px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 13px;
+    height: 34px;
+    min-width: 220px;
+    max-width: 100%;
+    padding: 0 34px 0 14px;
     border-radius: 9999px;
     border: 1.5px solid var(--border);
     background: var(--surface);
-    color: var(--ink-secondary);
-    font-size: 12.5px;
-    font-weight: 600;
+    color: var(--ink);
+    font: 600 13px var(--font-body);
   }
-  .range-toggle:hover, .range-toggle.active { border-color: var(--accent); color: var(--accent-strong); }
-  .range-pop {
-    position: absolute;
-    z-index: 30;
-    top: 38px;
-    left: 0;
-    width: 280px;
-    box-shadow: var(--shadow-lg);
-    background: var(--surface);
+  .preset-select select:hover, .preset-select select:focus { border-color: var(--accent); outline: none; }
+  @media (max-width: 560px) {
+    .period-cal { flex: 1 1 100%; }
+    .preset-select, .preset-select select { width: 100%; }
   }
-  .range-pop[hidden] { display: none; }
-  .range-pop .cal-picker { background: var(--surface); border: 1px solid var(--border); }
   .cal-year-btn {
     all: unset;
     cursor: pointer;
@@ -887,33 +897,30 @@
 
   <section class="panel">
     <div class="period-bar">
-      <div class="control-group">
-        <span class="control-group__label">Zeitraum</span>
-        <div class="period-current" id="periodCurrent">–</div>
-      </div>
-      <div class="control-group" style="flex: 1 1 360px">
-        <span class="control-group__label">Schnellauswahl</span>
-        <div class="chip-row" id="periodPresets"></div>
-      </div>
-      <div class="control-group">
-        <span class="control-group__label">Freie Auswahl</span>
-        <div class="range-picker">
-          <button class="range-toggle" id="rangeToggle" type="button">Monate / Spanne wählen ▾</button>
-          <div class="range-pop" id="rangePop" hidden>
-            <div class="cal-picker">
-              <div class="cal-picker__head">
-                <span class="control-group__label">Start und Ende anklicken</span>
-                <button class="cal-picker__reset" id="calClose" type="button">Fertig</button>
-              </div>
-              <div class="cal-picker__year">
-                <button class="cal-nav" id="calPrev" aria-label="Vorheriges Jahr">‹</button>
-                <button class="cal-year-btn" id="calYearLabel" title="Ganzes Jahr auswählen"></button>
-                <button class="cal-nav" id="calNext" aria-label="Nächstes Jahr">›</button>
-              </div>
-              <div class="cal-grid" id="calGrid"></div>
-              <div class="cal-hint" id="calHint">Ein Monat: zweimal anklicken · Jahr: auf die Jahreszahl klicken</div>
-            </div>
+      <div class="period-side">
+        <div class="control-group">
+          <span class="control-group__label">Zeitraum</span>
+          <div class="period-current" id="periodCurrent">–</div>
+        </div>
+        <div class="control-group">
+          <label class="control-group__label" for="periodPreset">Schnellauswahl</label>
+          <div class="preset-select">
+            <select id="periodPreset"></select>
           </div>
+        </div>
+      </div>
+      <div class="control-group period-cal">
+        <div class="cal-picker">
+          <div class="cal-picker__head">
+            <span class="control-group__label">Start und Ende anklicken</span>
+          </div>
+          <div class="cal-picker__year">
+            <button class="cal-nav" id="calPrev" aria-label="Vorheriges Jahr">‹</button>
+            <button class="cal-year-btn" id="calYearLabel" title="Ganzes Jahr auswählen"></button>
+            <button class="cal-nav" id="calNext" aria-label="Nächstes Jahr">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-hint" id="calHint">Ein Monat: zweimal anklicken · Jahr: auf die Jahreszahl klicken</div>
         </div>
       </div>
       <div class="control-group" style="flex: 1 1 100%">
@@ -1307,14 +1314,15 @@
     document.getElementById('periodCurrent').innerHTML =
       `${periodText(r)}<small>${len} ${len === 1 ? 'Monat' : 'Monate'} · ${monthLong(r.from)} bis ${monthLong(r.to)}${r.to === currentMonth() ? ' (laufend)' : ''}</small>`;
 
-    const presets = document.getElementById('periodPresets');
-    presets.innerHTML = presetList().map((p) => `<button class="chip ${state.preset === p.key ? 'active' : ''}" data-preset="${p.key}">${p.label}</button>`).join('');
-    presets.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
-      applyPreset(b.dataset.preset);
+    const presetSel = document.getElementById('periodPreset');
+    presetSel.innerHTML = (state.preset ? '' : '<option value="" selected disabled>Eigener Zeitraum</option>') +
+      presetList().map((p) => `<option value="${p.key}" ${state.preset === p.key ? 'selected' : ''}>${p.label}</option>`).join('');
+    presetSel.onchange = () => {
+      applyPreset(presetSel.value);
       state.calYear = parseInt(state.range.to.slice(0, 4), 10);
       state.pendingStart = null;
       renderAll(true);
-    }));
+    };
 
     const cf = document.getElementById('countryFilter');
     cf.innerHTML = `<button class="chip ${state.countries.size ? '' : 'active'}" data-country="__all__">Alle</button>` +
@@ -1366,17 +1374,6 @@
     applyPreset('y' + state.calYear);
     state.pendingStart = null;
     renderAll(true);
-  });
-  const rangePop = document.getElementById('rangePop');
-  const rangeToggle = document.getElementById('rangeToggle');
-  rangeToggle.addEventListener('click', (e) => {
-    e.stopPropagation();
-    rangePop.hidden = !rangePop.hidden;
-    rangeToggle.classList.toggle('active', !rangePop.hidden);
-  });
-  document.getElementById('calClose').addEventListener('click', () => { rangePop.hidden = true; rangeToggle.classList.remove('active'); state.pendingStart = null; renderCalendar(); });
-  document.addEventListener('click', (e) => {
-    if (!rangePop.hidden && e.target.isConnected && !e.target.closest('.range-picker')) { rangePop.hidden = true; rangeToggle.classList.remove('active'); }
   });
 
   // ---------- Render: KPI-Kacheln ----------
