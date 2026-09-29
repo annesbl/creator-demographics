@@ -869,6 +869,15 @@
     .stats--kpi { grid-template-columns: 1fr; }
     .wrap { padding: 20px 16px 48px; }
   }
+    /* ---------- Kalender breiter ---------- */
+  .period-side { flex: 0 1 auto; }
+  .period-cal { flex: 1 1 420px; }
+  .cal-grid { grid-template-columns: repeat(6, 1fr); }
+
+  @media (max-width: 560px) {
+    .period-cal { flex: 1 1 100%; }
+    .cal-grid { grid-template-columns: repeat(3, 1fr); }
+  }
 </style>
 
 <div class="wrap">
