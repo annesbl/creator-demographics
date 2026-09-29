@@ -982,10 +982,14 @@
 <script>
   // ---------- Konfiguration ----------
   const SHEET_ID = '1QLyXHtkUfqfhnXDFmM02-tdirOXl67KcLg6l-I9yVYY';
-  const DATA_GID = '1413219884'; // Tab extract_creator_demographics1 (Creator × Monat)
-  const SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${DATA_GID}`;
+  // Zwei Tabs mit je einem Extrakt (siehe creator_radar_1_creators.sql / creator_radar_2_activity.sql)
+  const CREATORS_GID = '569480666';  // Tab mit Query 1 (eine Zeile pro Creator)
+  const ACTIVITY_GID = '751983252';                   // Tab mit Query 2 (Creator × Monat)
+  const SHEET_EDIT_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit#gid=${ACTIVITY_GID}`;
   const params = new URLSearchParams(location.search);
-  const DATA_CSV_URL = params.get('src') || `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${DATA_GID}`;
+  const csvUrl = (gid) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+  const CREATORS_CSV_URL = params.get('creators') || csvUrl(CREATORS_GID);
+  const ACTIVITY_CSV_URL = params.get('activity') || csvUrl(ACTIVITY_GID);
   const PROFILE_BASE = 'https://speekly.io/creator-management/';
   const DEFAULT_MONTHS = 3;
 
@@ -1128,52 +1132,71 @@
   }
   const yes = (v) => String(v || '').trim() === 'Ja';
 
-  function ingest(table) {
-    // Kopfzeile suchen (Extrakte können Leer-/Titelzeilen davor haben)
-    const hRow = table.slice(0, 30).findIndex((r) => r.some((c) => String(c).trim().replace(/^\uFEFF/, '') === 'creator_id'));
+  const flag = (v) => { const t = String(v || '').trim().toLowerCase(); return t === 'ja' || t === '1' || t === 'true'; };
+  const clean = (h) => String(h).trim().replace(/^﻿/, '');
+  function headerTable(table, name, required) {
+    const hRow = table.slice(0, 30).findIndex((r) => r.some((c) => clean(c) === 'creator_id'));
     if (hRow === -1) {
       const seen = (table[0] || []).filter((c) => String(c).trim()).slice(0, 6).join(', ') || 'leer';
-      throw new Error(`Keine Spalte „creator_id“ gefunden. Der Tab (gid ${DATA_GID}) liefert stattdessen: ${seen}`);
+      throw new Error(`Tab „${name}“: keine Spalte „creator_id“ gefunden (liefert: ${seen}). Ist das Extrakt fertig geladen?`);
     }
-    table = table.slice(hRow);
-    const header = table[0].map((h) => String(h).trim().replace(/^\uFEFF/, ''));
-    const col = (name) => header.indexOf(name);
-    const idx = {
-      id: col('creator_id'), month: col('month'), country: col('country'), gender: col('gender'), age: col('age_group'),
-      newAp: col('is_new_approved'), approvedMonth: col('approved_month'), blocked: col('is_blocked'), blockedM: col('blocked_in_month'),
-      apps: col('total_applications'), succ: col('successful_applications'), comm: col('commissions'), pay: col('payout_eur'), paid: col('paid_commissions'),
-      rising: col('is_rising_star'),
-    };
-    const missing = Object.entries(idx).filter(([k, v]) => v === -1 && k !== 'paid').map(([k]) => k);
-    if (missing.length) throw new Error('Spalten fehlen im Sheet: ' + missing.join(', ') + ' – bitte neue Query in extract_creator_demographics1 einsetzen');
+    const header = table[hRow].map(clean);
+    const col = {};
+    required.forEach((k) => { col[k] = header.indexOf(k); });
+    const missing = required.filter((k) => col[k] === -1 && k !== 'paid_commissions');
+    if (missing.length) throw new Error(`Tab „${name}“: Spalten fehlen: ${missing.join(', ')}`);
+    return { body: table.slice(hRow + 1), col };
+  }
 
-    const rows = [];
+  function ingest(creatorsTable, activityTable) {
+    const C = headerTable(creatorsTable, 'Creators', ['creator_id', 'country', 'gender', 'age_group', 'approved_month', 'blocked_month', 'is_rising_star']);
+    const A = headerTable(activityTable, 'Activity', ['creator_id', 'month', 'total_applications', 'successful_applications', 'commissions', 'paid_commissions', 'payout_eur']);
+
     const info = new Map();
-    for (let i = 1; i < table.length; i++) {
-      const r = table[i];
-      const m = parseMonth(r[idx.month]);
-      if (!m) continue;
-      const age = (r[idx.age] || '').trim();
-      const rec = {
-        id: (r[idx.id] || '').trim(),
-        m,
-        c: (r[idx.country] || '').trim() || 'Unbekannt',
-        g: (r[idx.gender] || '').trim() || 'Unbekannt',
+    for (const r of C.body) {
+      const id = (r[C.col.creator_id] || '').trim();
+      if (!id) continue;
+      const age = (r[C.col.age_group] || '').trim();
+      info.set(id, {
+        c: (r[C.col.country] || '').trim() || 'Unbekannt',
+        g: (r[C.col.gender] || '').trim() || 'Unbekannt',
         a: age === '' || age === 'Unknown' ? 'Unbekannt' : age,
-        newAp: yes(r[idx.newAp]),
-        blockedM: yes(r[idx.blockedM]),
-        apps: parseNum(r[idx.apps]),
-        succ: parseNum(r[idx.succ]),
-        comm: parseNum(r[idx.comm]),
-        pay: parseNum(r[idx.pay]),
-        paid: idx.paid === -1 ? parseNum(r[idx.comm]) : parseNum(r[idx.paid]),
-      };
-      rows.push(rec);
-      if (!info.has(rec.id)) {
-        info.set(rec.id, { c: rec.c, g: rec.g, a: rec.a, approvedMonth: parseMonth(r[idx.approvedMonth]), rising: yes(r[idx.rising]) });
-      }
+        approvedMonth: parseMonth(r[C.col.approved_month]),
+        blockedMonth: parseMonth(r[C.col.blocked_month]),
+        rising: flag(r[C.col.is_rising_star]),
+      });
     }
-    return { rows, info };
+
+    const byKey = new Map();
+    const get = (id, m) => {
+      const k = id + '|' + m;
+      let rec = byKey.get(k);
+      if (!rec) {
+        const inf = info.get(id);
+        rec = { id, m, c: inf.c, g: inf.g, a: inf.a, newAp: false, blockedM: false, apps: 0, succ: 0, comm: 0, pay: 0, paid: 0 };
+        byKey.set(k, rec);
+      }
+      return rec;
+    };
+    for (const r of A.body) {
+      const id = (r[A.col.creator_id] || '').trim();
+      const m = parseMonth(r[A.col.month]);
+      if (!m || !info.has(id)) continue;
+      const rec = get(id, m);
+      rec.apps = parseNum(r[A.col.total_applications]);
+      rec.succ = parseNum(r[A.col.successful_applications]);
+      rec.comm = parseNum(r[A.col.commissions]);
+      rec.pay = parseNum(r[A.col.payout_eur]);
+      rec.paid = A.col.paid_commissions === -1 ? rec.comm : parseNum(r[A.col.paid_commissions]);
+    }
+    // Approval- und Block-Monate als eigene Ereignisse ergänzen (ab Beginn der Activity-Historie)
+    let minM = null;
+    byKey.forEach((r) => { if (!minM || r.m < minM) minM = r.m; });
+    info.forEach((inf, id) => {
+      if (inf.approvedMonth && (!minM || inf.approvedMonth >= minM)) get(id, inf.approvedMonth).newAp = true;
+      if (inf.blockedMonth && (!minM || inf.blockedMonth >= minM)) get(id, inf.blockedMonth).blockedM = true;
+    });
+    return { rows: [...byKey.values()], info };
   }
 
   function rebuildDerived() {
@@ -1375,7 +1398,7 @@
 
     const subs = {
       active: `${KPIS[0].sub}`,
-      unsuccessful: `${fmtInt(cur.unsuccessfulN)} von ${fmtInt(cur.active)} aktiven Creatorn ohne Job`,
+      unsuccessful: `${fmtInt(cur.unsuccessfulN)} von ${fmtInt(cur.active)} aktiven Creatorn ohne Job · Key-Result-Sheet = nur Deutschland`,
       payout: `${KPIS[2].sub} · ${fmtInt(cur.payoutN)} Creator-Monate`,
       commPerActive: `${fmtInt(cur.commN)} Jobs ÷ ${fmtInt(cur.active)} aktive Creator`,
       newApproved: `Ø ${fmtDecF.format(cur.newApprovedAvg)} pro Monat`,
@@ -1749,13 +1772,16 @@
     const banner = document.getElementById('statusBanner');
     document.getElementById('sheetLink').href = SHEET_EDIT_URL;
     try {
-      const res = await fetch(DATA_CSV_URL, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const text = await res.text();
-      if (/^\s*<(!doctype|html)/i.test(text)) throw new Error('Google liefert eine Anmeldeseite statt CSV – bitte das Sheet für „Jeder mit dem Link: Betrachter“ freigeben');
-      const table = parseCsv(text);
-      if (table.length < 2) throw new Error('Keine Zeilen im Sheet');
-      const { rows, info } = ingest(table);
+      if (!params.get('creators') && CREATORS_GID.startsWith('HIER')) throw new Error('Die gid des Creators-Tabs ist noch nicht eingetragen (CREATORS_GID in index.html)');
+      const load = async (url, name) => {
+        const res = await fetch(url, { cache: 'no-store' });
+        if (!res.ok) throw new Error(`Tab „${name}“: HTTP ${res.status}`);
+        const text = await res.text();
+        if (/^\s*<(!doctype|html)/i.test(text)) throw new Error('Google liefert eine Anmeldeseite statt CSV – bitte das Sheet für „Jeder mit dem Link: Betrachter“ freigeben');
+        return parseCsv(text);
+      };
+      const [cTable, aTable] = await Promise.all([load(CREATORS_CSV_URL, 'Creators'), load(ACTIVITY_CSV_URL, 'Activity')]);
+      const { rows, info } = ingest(cTable, aTable);
       if (!rows.length) throw new Error('Keine gültigen Monatszeilen im Sheet');
       ROWS = rows;
       CREATOR_INFO = info;
