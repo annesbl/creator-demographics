@@ -869,15 +869,6 @@
     .stats--kpi { grid-template-columns: 1fr; }
     .wrap { padding: 20px 16px 48px; }
   }
-    /* ---------- Kalender breiter ---------- */
-  .period-side { flex: 0 1 auto; }
-  .period-cal { flex: 1 1 420px; }
-  .cal-grid { grid-template-columns: repeat(6, 1fr); }
-
-  @media (max-width: 560px) {
-    .period-cal { flex: 1 1 100%; }
-    .cal-grid { grid-template-columns: repeat(3, 1fr); }
-  }
 </style>
 
 <div class="wrap">
@@ -917,6 +908,10 @@
             <select id="periodPreset"></select>
           </div>
         </div>
+        <div class="control-group">
+          <span class="control-group__label">Land</span>
+          <div class="chip-row" id="countryFilter"></div>
+        </div>
       </div>
       <div class="control-group period-cal">
         <div class="cal-picker">
@@ -931,10 +926,6 @@
           <div class="cal-grid" id="calGrid"></div>
           <div class="cal-hint" id="calHint">Ein Monat: zweimal anklicken · Jahr: auf die Jahreszahl klicken</div>
         </div>
-      </div>
-      <div class="control-group" style="flex: 1 1 100%">
-        <span class="control-group__label">Land</span>
-        <div class="chip-row" id="countryFilter"></div>
       </div>
     </div>
   </section>
@@ -1020,11 +1011,11 @@
 
   const KPIS = [
     { key: 'active', label: 'Aktive Creator', fmt: 'int', better: 'up',
-      sub: 'mind. 1 Bewerbung im Zeitraum · jeder Creator 1×', histLabel: 'Aktive Creator pro Monat' },
+      sub: 'mind. 1 Bewerbung im Zeitraum', histLabel: 'Aktive Creator pro Monat' },
     { key: 'unsuccessful', label: 'Unsuccessful Creator', fmt: 'pct', better: 'down',
       sub: 'aktive Creator ohne Job aus ihren Bewerbungen', histLabel: 'Unsuccessful % pro Monat' },
     { key: 'payout', label: 'Ø Auszahlung erfolgreicher Creator', fmt: 'eur', better: 'up',
-      sub: 'pro Monat · ≥ 2 Jobs, alle bereits geliefert', histLabel: 'Ø Auszahlung erfolgreicher Creator pro Monat' },
+      sub: '≥ 2 Jobs', histLabel: 'Ø Auszahlung erfolgreicher Creator pro Monat' },
     { key: 'commPerActive', label: 'Ø Commissions pro aktivem Creator', fmt: 'dec', better: 'up',
       sub: 'Jobs im Zeitraum ÷ aktive Creator', histLabel: 'Ø Commissions pro aktivem Creator pro Monat' },
     { key: 'newApproved', label: 'Neue approved Creator', fmt: 'int', better: 'up',
@@ -1404,9 +1395,9 @@
 
     const subs = {
       active: `${KPIS[0].sub}`,
-      unsuccessful: `${fmtInt(cur.unsuccessfulN)} von ${fmtInt(cur.active)} aktiven Creatorn ohne Job · Key-Result-Sheet = nur Deutschland`,
-      payout: `${KPIS[2].sub} · ${fmtInt(cur.payoutN)} Creator-Monate`,
-      commPerActive: `${fmtInt(cur.commN)} Jobs ÷ ${fmtInt(cur.active)} aktive Creator`,
+      unsuccessful: `${fmtInt(cur.unsuccessfulN)} von ${fmtInt(cur.active)} aktiven Creatorn ohne Job`,
+      payout: `pro Monat im Zeitraum ${periodText(state.range)} · ${KPIS[2].sub}`,
+      commPerActive: '',
       newApproved: `Ø ${fmtDecF.format(cur.newApprovedAvg)} pro Monat`,
     };
     document.getElementById('stats').innerHTML = KPIS.map((k) => `
