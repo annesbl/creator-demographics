@@ -881,7 +881,6 @@
       </div>
       <div class="topbar__title">
         <h1>Creator Radar</h1>
-        <p>Aktive Creator, Erfolg und Auszahlung pro Monat, aufgeschlüsselt nach Demografie und Land. Daten live aus Google Sheets.</p>
       </div>
     </div>
     <div class="topbar__meta">
@@ -1784,7 +1783,7 @@
       CREATOR_INFO = info;
       rebuildDerived();
       sourcePill.textContent = 'Live aus Google Sheet';
-      updatedNote.textContent = `Stand: ${new Date().toLocaleString('de-DE')} · ${fmtInt(ROWS.length)} Creator-Monate`;
+      updatedNote.textContent = `Stand: ${new Date().toLocaleString('de-DE')}`;
       renderAll(true);
     } catch (err) {
       console.warn('Live-Daten konnten nicht geladen werden:', err);
