@@ -1484,8 +1484,9 @@
     const viewW = Math.max(scrollEl.clientWidth, 280);
     // wie im Sales-Dashboard: mindestens 12 Monate sichtbar, Balken max. 58 px
     const len = monthDiff(state.range.from, state.range.to) + 1;
-    const visible = Math.min(Math.max(len, 12), Math.max(ALL_MONTHS.length, 1));
-    const slot = Math.max(30, Math.min(120, (viewW - 12) / visible));
+    // auf breiten Bildschirmen mehr Monate zeigen, damit die Lücken zwischen den Balken klein bleiben (Slot ca. 75 px)
+    const visible = Math.min(Math.max(len, 12, Math.round(viewW / 75)), Math.max(ALL_MONTHS.length, 1));
+    const slot = Math.max(30, (viewW - 12) / visible);
     return { slot, barW: Math.max(12, Math.min(58, slot * 0.74)), viewW };
   }
 
@@ -1798,7 +1799,7 @@
     box.innerHTML = list.map((r) => `
       <a class="rising-item" href="${PROFILE_BASE}${r.id}" target="_blank" rel="noopener noreferrer" data-id="${r.id}">
         <span class="rising-item__id${r.name ? ' rising-item__id--name' : ''}" title="${r.id}">${r.name ? escapeHtml(r.name) : r.id}</span>
-        <span class="rising-item__meta">${[r.g, r.a, r.c].filter((v) => v && v !== 'Unbekannt').map(seriesLabel).join(' · ')} · approved <b>${monthLabel(r.approvedMonth)}</b></span>
+        <span class="rising-item__meta">${[r.g, r.a, r.c].filter((v) => v && v !== 'Unbekannt').map(seriesLabel).join(' · ')}</span>
       </a>`).join('');
     box.querySelectorAll('.rising-item').forEach((el) => {
       el.addEventListener('mouseenter', () => focusRising(el.dataset.id));
