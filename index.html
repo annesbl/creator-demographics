@@ -829,6 +829,37 @@
   .rising__head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .rising__head h2 { margin: 0; font-family: var(--font-display); font-size: 18px; }
   .rising__head p { margin: 0; font-size: 12px; color: var(--ink-muted); }
+  .cohort { display: flex; flex-direction: column; gap: 8px; }
+  /* ---------- kompakte Filterleiste ---------- */
+  .panel--filters { padding: 12px 16px; gap: 10px; box-shadow: none; }
+  .panel--filters .period-bar { gap: 10px 24px; align-items: flex-start; }
+  .panel--filters .period-side { gap: 10px; }
+  .panel--filters .control-group { gap: 4px; }
+  .panel--filters .control-group__label { font-size: 10px; }
+  .panel--filters .period-current { font-size: 14px; }
+  .panel--filters .period-current small { font-size: 10.5px; }
+  .panel--filters .preset-select select { height: 28px; min-width: 150px; font-size: 12px; padding: 0 30px 0 12px; }
+  .panel--filters .preset-select::after { right: 11px; font-size: 10px; }
+  .panel--filters .chip-row { gap: 5px; }
+  .panel--filters .chip { height: 26px; padding: 0 10px; font-size: 11.5px; border-width: 1px; }
+  .panel--filters .period-cal { flex: 0 1 260px; }
+  .panel--filters .cal-picker { padding: 8px 10px; gap: 5px; border-radius: 10px; }
+  .panel--filters .cal-picker__year { font-size: 12px; gap: 6px; }
+  .panel--filters .cal-nav { width: 18px; height: 18px; }
+  .panel--filters .cal-grid { gap: 4px; }
+  .panel--filters .cal-month { padding: 3px 0; font-size: 11px; border-radius: 6px; border-width: 1px; }
+  .panel--filters .cal-hint { font-size: 10px; }
+  @media (max-width: 560px) { .panel--filters .period-cal { flex: 1 1 100%; } }
+
+  /* ---------- KPI-Zeile im Stil des Sales-Dashboards ---------- */
+  .stats--kpi { gap: 8px 28px; margin: 6px 0 4px; }
+  .stats--kpi .stat { background: transparent; border: 0; box-shadow: none; border-radius: 12px; padding: 10px 12px; gap: 6px; transition: background-color 0.15s ease; }
+  .stats--kpi .stat:hover, .stats--kpi .stat.is-open { background: var(--surface); }
+  .stats--kpi .stat.is-open { box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .stats--kpi .stat__label { font-size: 13px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--ink-secondary); }
+  .stats--kpi .stat__value { font-size: clamp(26px, 2.4vw, 34px); line-height: 1.05; letter-spacing: -0.015em; }
+  .stats--kpi .stat__sub { font-size: 12px; color: var(--ink-muted); min-height: 1em; }
+
   .rising__list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
   .rising-item {
     display: flex;
@@ -885,8 +916,8 @@
     </div>
     <div class="topbar__meta">
       <div class="topbar__pills">
-        <span class="updated-pill"><span class="updated-pill__dot"></span><span id="sourcePill">Lade Live-Daten…</span></span>
-        <a class="sheet-link" id="sheetLink" href="#" target="_blank" rel="noopener noreferrer">Quell-Sheet öffnen ↗</a>
+        <span class="updated-pill"><span class="updated-pill__dot"></span><span id="sourcePill">Loading live data…</span></span>
+        <a class="sheet-link" id="sheetLink" href="#" target="_blank" rel="noopener noreferrer">Open source sheet ↗</a>
       </div>
       <span class="source-note" id="updatedNote"></span>
     </div>
@@ -894,36 +925,36 @@
 
   <div class="status-banner" id="statusBanner" hidden></div>
 
-  <section class="panel">
+  <section class="panel panel--filters">
     <div class="period-bar">
       <div class="period-side">
         <div class="control-group">
-          <span class="control-group__label">Zeitraum</span>
+          <span class="control-group__label">Time range</span>
           <div class="period-current" id="periodCurrent">–</div>
         </div>
         <div class="control-group">
-          <label class="control-group__label" for="periodPreset">Schnellauswahl</label>
+          <label class="control-group__label" for="periodPreset">Quick select</label>
           <div class="preset-select">
             <select id="periodPreset"></select>
           </div>
         </div>
         <div class="control-group">
-          <span class="control-group__label">Land</span>
+          <span class="control-group__label">Country</span>
           <div class="chip-row" id="countryFilter"></div>
         </div>
       </div>
       <div class="control-group period-cal">
         <div class="cal-picker">
           <div class="cal-picker__head">
-            <span class="control-group__label">Start und Ende anklicken</span>
+            <span class="control-group__label">Click start and end</span>
           </div>
           <div class="cal-picker__year">
-            <button class="cal-nav" id="calPrev" aria-label="Vorheriges Jahr">‹</button>
-            <button class="cal-year-btn" id="calYearLabel" title="Ganzes Jahr auswählen"></button>
-            <button class="cal-nav" id="calNext" aria-label="Nächstes Jahr">›</button>
+            <button class="cal-nav" id="calPrev" aria-label="Previous year">‹</button>
+            <button class="cal-year-btn" id="calYearLabel" title="Select the whole year"></button>
+            <button class="cal-nav" id="calNext" aria-label="Next year">›</button>
           </div>
           <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-hint" id="calHint">Ein Monat: zweimal anklicken · Jahr: auf die Jahreszahl klicken</div>
+          <div class="cal-hint" id="calHint">One month: click twice · Whole year: click the year</div>
         </div>
       </div>
     </div>
@@ -934,13 +965,13 @@
   <section class="history" id="history" hidden>
     <div class="history__head">
       <div class="history__title" id="historyTitle"></div>
-      <button type="button" class="rising-panel__close" id="historyClose">Schließen</button>
+      <button type="button" class="rising-panel__close" id="historyClose">Close</button>
     </div>
     <div class="chart-frame">
       <svg class="y-axis" id="historyAxis"></svg>
       <div class="chart-scroll" id="historyScroll"><svg id="historyChart"></svg></div>
     </div>
-    <span class="scroll-hint">Hervorgehoben: gewählter Zeitraum · nach links scrollen für ältere Monate</span>
+    <span class="scroll-hint">Highlighted: selected range · scroll left for older months</span>
   </section>
 
   <section class="stats stats--minor" id="minorStats"></section>
@@ -948,10 +979,10 @@
   <section class="panel">
     <div class="controls">
       <div class="control-group">
-        <span class="control-group__label">Aktive Creator pro Monat · Aufschlüsselung</span>
+        <span class="control-group__label">Active creators per month · Breakdown</span>
         <div class="segmented" id="dimensionSwitch"></div>
       </div>
-      <span class="scroll-hint">Nach links wischen oder scrollen, um ältere Monate zu sehen</span>
+      <span class="scroll-hint">Swipe or scroll left to see older months</span>
     </div>
 
     <div class="charts">
@@ -960,12 +991,12 @@
         <div class="chart-scroll" id="barScroll"><svg id="barChart"></svg></div>
       </div>
       <div class="donut-wrap">
-        <h3 id="pieTitle">Verteilung</h3>
+        <h3 id="pieTitle">Distribution</h3>
         <div class="donut-figure">
           <svg id="donutChart" width="220" height="220"></svg>
           <div class="donut-total">
             <span class="donut-total__value" id="donutTotal">0</span>
-            <span class="donut-total__label">aktive Creator</span>
+            <span class="donut-total__label">active creators</span>
           </div>
         </div>
         <div class="legend" id="legend"></div>
@@ -976,7 +1007,15 @@
   <section class="panel rising" id="risingSection">
     <div class="rising__head">
       <h2 id="risingTitle">Rising Stars</h2>
-      <p>≥ 9 Jobs im ersten Monat nach Approval · gefiltert auf den Approval-Monat im gewählten Zeitraum · Hover zeigt die Position im Graphen, Klick öffnet das Profil</p>
+      <p>Jobs in the first 30 days after first approval: Germany ≥ 9 · Netherlands ≥ 6 · Italy, UK, France, Spain ≥ 4 · List: approved in the selected range · click opens the profile</p>
+    </div>
+    <div class="cohort">
+      <div class="history__title" id="cohortTitle"></div>
+      <div class="chart-frame">
+        <svg class="y-axis" id="cohortAxis"></svg>
+        <div class="chart-scroll" id="cohortScroll"><svg id="cohortChart"></svg></div>
+      </div>
+      <span class="scroll-hint" id="cohortHint"></span>
     </div>
     <div class="rising__list" id="risingList"></div>
   </section>
@@ -1000,25 +1039,28 @@
   const DEFAULT_MONTHS = 3;
 
   const DIMENSIONS = [
-    { key: 'a', label: 'Altersgruppe', order: ['< 18', '18-24', '25-34', '35-44', '45-54', '55+', 'Unbekannt'] },
-    { key: 'g', label: 'Geschlecht', order: ['female', 'male', 'diverse', 'Unbekannt'] },
-    { key: 'c', label: 'Land', order: ['Deutschland', 'Italien', 'Niederlande', 'UK/Englischsprachig', 'Frankreich', 'Spanien', 'Unbekannt'] },
+    { key: 'a', label: 'Age group', order: ['< 18', '18-24', '25-34', '35-44', '45-54', '55+', 'Unbekannt'] },
+    { key: 'g', label: 'Gender', order: ['female', 'male', 'diverse', 'Unbekannt'] },
+    { key: 'c', label: 'Country', order: ['Deutschland', 'Italien', 'Niederlande', 'UK/Englischsprachig', 'Frankreich', 'Spanien', 'Unbekannt'] },
   ];
-  const LABELS = { female: 'Weiblich', male: 'Männlich', diverse: 'Divers', Unbekannt: 'Unbekannt' };
+  const LABELS = {
+    female: 'Female', male: 'Male', diverse: 'Diverse', Unbekannt: 'Unknown',
+    Deutschland: 'Germany', Italien: 'Italy', Niederlande: 'Netherlands', 'UK/Englischsprachig': 'UK/English', Frankreich: 'France', Spanien: 'Spain',
+  };
   const PALETTE = ['var(--cat-1)', 'var(--cat-2)', 'var(--cat-3)', 'var(--cat-4)', 'var(--cat-5)', 'var(--cat-6)', 'var(--cat-7)'];
-  const MONTH_NAMES = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+  const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const KPIS = [
-    { key: 'active', label: 'Aktive Creator', fmt: 'int', better: 'up',
-      sub: 'mind. 1 Bewerbung im Zeitraum', histLabel: 'Aktive Creator pro Monat' },
-    { key: 'unsuccessful', label: 'Unsuccessful Creator', fmt: 'pct', better: 'down',
-      sub: 'aktive Creator ohne Job aus ihren Bewerbungen', histLabel: 'Unsuccessful % pro Monat' },
-    { key: 'payout', label: 'Ø Auszahlung erfolgreicher Creator', fmt: 'eur', better: 'up',
-      sub: '≥ 2 Jobs', histLabel: 'Ø Auszahlung erfolgreicher Creator pro Monat' },
-    { key: 'commPerActive', label: 'Ø Commissions pro aktivem Creator', fmt: 'dec', better: 'up',
-      sub: 'Jobs im Zeitraum ÷ aktive Creator', histLabel: 'Ø Commissions pro aktivem Creator pro Monat' },
-    { key: 'newApproved', label: 'Neue approved Creator', fmt: 'int', better: 'up',
-      sub: 'Approvals im Zeitraum', histLabel: 'Neue approved Creator pro Monat' },
+    { key: 'active', label: 'Active creators', fmt: 'int', better: 'up',
+      sub: 'at least 1 application in range', histLabel: 'Active creators per month' },
+    { key: 'unsuccessful', label: 'Unsuccessful creators', fmt: 'pct', better: 'down',
+      sub: 'active creators without a job from their applications', histLabel: 'Unsuccessful % per month' },
+    { key: 'payout', label: 'Ø payout per successful creator', fmt: 'eur', better: 'up',
+      sub: 'per month · ≥ 2 jobs', histLabel: 'Ø payout per successful creator per month' },
+    { key: 'commPerActive', label: 'Ø commissions per active creator', fmt: 'dec', better: 'up',
+      sub: '', histLabel: 'Ø commissions per active creator per month' },
+    { key: 'newApproved', label: 'New approved creators', fmt: 'int', better: 'neutral',
+      sub: 'approvals in range', histLabel: 'New approved creators per month' },
   ];
 
   // ---------- State ----------
@@ -1041,14 +1083,14 @@
   };
 
   // ---------- Helpers ----------
-  const fmtIntF = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
-  const fmtDecF = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const fmtPctF = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtIntF = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
+  const fmtDecF = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtPctF = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   function fmtInt(n) { return fmtIntF.format(Math.round(n)); }
   function fmtVal(v, kind) {
     if (v == null || Number.isNaN(v)) return '–';
-    if (kind === 'pct') return `${fmtPctF.format(v * 100)} %`;
-    if (kind === 'eur') return `${fmtIntF.format(Math.round(v))} €`;
+    if (kind === 'pct') return `${fmtPctF.format(v * 100)}%`;
+    if (kind === 'eur') return `€${fmtIntF.format(Math.round(v))}`;
     if (kind === 'dec') return fmtDecF.format(v);
     return fmtInt(v);
   }
@@ -1095,7 +1137,7 @@
   }
   function axisFmt(v, kind) {
     if (kind === 'pct') return `${Math.round(v * 100)}%`;
-    if (kind === 'eur') return `${fmtIntF.format(v)}€`;
+    if (kind === 'eur') return `€${fmtIntF.format(v)}`;
     if (kind === 'dec') return fmtDecF.format(v);
     return fmtIntF.format(v);
   }
@@ -1144,13 +1186,13 @@
     const hRow = table.slice(0, 30).findIndex((r) => r.some((c) => clean(c) === 'creator_id'));
     if (hRow === -1) {
       const seen = (table[0] || []).filter((c) => String(c).trim()).slice(0, 6).join(', ') || 'leer';
-      throw new Error(`Tab „${name}“: keine Spalte „creator_id“ gefunden (liefert: ${seen}). Ist das Extrakt fertig geladen?`);
+      throw new Error(`Tab "${name}": no "creator_id" column found (got: ${seen}). Has the extract finished loading?`);
     }
     const header = table[hRow].map(clean);
     const col = {};
     required.forEach((k) => { col[k] = header.indexOf(k); });
     const missing = required.filter((k) => col[k] === -1 && k !== 'paid_commissions');
-    if (missing.length) throw new Error(`Tab „${name}“: Spalten fehlen: ${missing.join(', ')}`);
+    if (missing.length) throw new Error(`Tab "${name}": missing columns: ${missing.join(', ')}`);
     return { body: table.slice(hRow + 1), col };
   }
 
@@ -1228,18 +1270,20 @@
   }
   function presetList() {
     const list = [
-      { key: 'last3', label: 'Letzte 3 Monate' },
-      { key: 'last6', label: 'Letzte 6 Monate' },
-      { key: 'last12', label: 'Letzte 12 Monate' },
+      { key: 'last3', label: 'Last 3 months' },
+      { key: 'last6', label: 'Last 6 months' },
+      { key: 'last12', label: 'Last 12 months' },
     ];
     [...ALL_YEARS].reverse().forEach((y) => list.push({ key: 'y' + y, label: y }));
-    list.push({ key: 'all', label: 'Alles' });
+    list.push({ key: 'all', label: 'All time' });
     return list;
   }
   function applyPreset(key) {
     const last = lastMonth();
     let r;
-    if (key.startsWith('last')) { const n = parseInt(key.slice(4), 10); r = { from: addMonths(last, -(n - 1)), to: last }; }
+    // "Last n months" = die letzten n abgeschlossenen Monate (der laufende Monat verzerrt sonst die Vergleiche)
+    const lastFull = last === currentMonth() && ALL_MONTHS.length > 1 ? addMonths(last, -1) : last;
+    if (key.startsWith('last')) { const n = parseInt(key.slice(4), 10); r = { from: addMonths(lastFull, -(n - 1)), to: lastFull }; }
     else if (key.startsWith('y')) { const y = key.slice(1); r = { from: `${y}-01`, to: `${y}-12` }; }
     else r = { from: ALL_MONTHS[0], to: last };
     state.preset = key;
@@ -1311,10 +1355,10 @@
     const r = state.range;
     const len = monthDiff(r.from, r.to) + 1;
     document.getElementById('periodCurrent').innerHTML =
-      `${periodText(r)}<small>${len} ${len === 1 ? 'Monat' : 'Monate'} · ${monthLong(r.from)} bis ${monthLong(r.to)}${r.to === currentMonth() ? ' (laufend)' : ''}</small>`;
+      `${periodText(r)}<small>${len} ${len === 1 ? 'month' : 'months'} · ${monthLong(r.from)} to ${monthLong(r.to)}${r.to === currentMonth() ? ' (ongoing)' : ''}</small>`;
 
     const presetSel = document.getElementById('periodPreset');
-    presetSel.innerHTML = (state.preset ? '' : '<option value="" selected disabled>Eigener Zeitraum</option>') +
+    presetSel.innerHTML = (state.preset ? '' : '<option value="" selected disabled>Custom range</option>') +
       presetList().map((p) => `<option value="${p.key}" ${state.preset === p.key ? 'selected' : ''}>${p.label}</option>`).join('');
     presetSel.onchange = () => {
       applyPreset(presetSel.value);
@@ -1324,8 +1368,8 @@
     };
 
     const cf = document.getElementById('countryFilter');
-    cf.innerHTML = `<button class="chip ${state.countries.size ? '' : 'active'}" data-country="__all__">Alle</button>` +
-      ALL_COUNTRIES.map((c) => `<button class="chip ${state.countries.has(c) ? 'active' : ''}" data-country="${c}">${c}</button>`).join('');
+    cf.innerHTML = `<button class="chip ${state.countries.size ? '' : 'active'}" data-country="__all__">All</button>` +
+      ALL_COUNTRIES.map((c) => `<button class="chip ${state.countries.has(c) ? 'active' : ''}" data-country="${c}">${seriesLabel(c)}</button>`).join('');
     cf.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => {
       const c = b.dataset.country;
       if (c === '__all__') state.countries.clear();
@@ -1356,12 +1400,12 @@
       const key = b.dataset.month;
       if (!state.pendingStart) {
         state.pendingStart = key;
-        document.getElementById('calHint').textContent = `Start: ${monthLong(key)} – jetzt Ende anklicken (auch in anderem Jahr)`;
+        document.getElementById('calHint').textContent = `Start: ${monthLong(key)} – now click the end (any year)`;
         renderCalendar();
       } else {
         setRange(state.pendingStart, key);
         state.pendingStart = null;
-        document.getElementById('calHint').textContent = 'Ein Monat: zweimal anklicken · Jahr: auf die Jahreszahl klicken';
+        document.getElementById('calHint').textContent = 'One month: click twice · Whole year: click the year';
         renderAll(true);
       }
     }));
@@ -1377,13 +1421,13 @@
 
   // ---------- Render: KPI-Kacheln ----------
   function deltaHtml(kpi, cur, prev) {
-    if (cur == null || prev == null) return '<span class="stat__delta flat">kein Vergleich</span>';
+    if (cur == null || prev == null) return '<span class="stat__delta flat">no comparison</span>';
     let diff, txt;
-    if (kpi.fmt === 'pct') { diff = cur - prev; txt = `${diff >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(diff) * 100)} PP`; }
-    else { diff = prev ? (cur - prev) / prev : 0; txt = `${diff >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(diff) * 100)} %`; }
+    if (kpi.fmt === 'pct') { diff = cur - prev; txt = `${diff >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(diff) * 100)}%`; }
+    else { diff = prev ? (cur - prev) / prev : 0; txt = `${diff >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(diff) * 100)}%`; }
     const good = kpi.better === 'up' ? diff > 0 : diff < 0;
-    const cls = Math.abs(diff) < 0.0005 ? 'flat' : good ? 'up' : 'down';
-    return `<span class="stat__delta ${cls}" title="Vergleich mit der gleich langen Vorperiode">${diff >= 0 ? '▲' : '▼'} ${txt} vs. Vorperiode</span>`;
+    const cls = kpi.better === 'neutral' || Math.abs(diff) < 0.0005 ? 'flat' : good ? 'up' : 'down';
+    return `<span class="stat__delta ${cls}" title="Compared with the previous period of the same length">${diff >= 0 ? '▲' : '▼'} ${txt} vs. previous period</span>`;
   }
 
   function renderStats() {
@@ -1394,17 +1438,17 @@
 
     const subs = {
       active: `${KPIS[0].sub}`,
-      unsuccessful: `${fmtInt(cur.unsuccessfulN)} von ${fmtInt(cur.active)} aktiven Creatorn ohne Job`,
-      payout: `pro Monat im Zeitraum ${periodText(state.range)} · ${KPIS[2].sub}`,
+      unsuccessful: `${fmtInt(cur.unsuccessfulN)} of ${fmtInt(cur.active)} active creators without a job`,
+      payout: KPIS[2].sub,
       commPerActive: '',
-      newApproved: `Ø ${fmtDecF.format(cur.newApprovedAvg)} pro Monat`,
+      newApproved: `Ø ${fmtDecF.format(cur.newApprovedAvg)} per month`,
     };
     document.getElementById('stats').innerHTML = KPIS.map((k) => `
-      <div class="stat stat--clickable ${state.openKpi === k.key ? 'is-open' : ''}" data-kpi="${k.key}" role="button" tabindex="0" title="Klicken für den Verlauf">
+      <div class="stat stat--clickable ${state.openKpi === k.key ? 'is-open' : ''}" data-kpi="${k.key}" role="button" tabindex="0" title="Click to see the history">
         <span class="stat__label">${k.label}</span>
         <span class="stat__value">${fmtVal(cur[k.key], k.fmt)}</span>
         <span class="stat__sub">${subs[k.key]}</span>
-        <span class="stat__foot">${deltaHtml(k, cur[k.key], prev ? prev[k.key] : null)}<span class="stat__hint">${state.openKpi === k.key ? 'Verlauf ▴' : 'Verlauf ▾'}</span></span>
+        <span class="stat__foot">${deltaHtml(k, cur[k.key], prev ? prev[k.key] : null)}<span class="stat__hint">${state.openKpi === k.key ? 'History ▴' : 'History ▾'}</span></span>
       </div>`).join('');
     document.querySelectorAll('#stats .stat').forEach((el) => {
       const open = () => { state.openKpi = state.openKpi === el.dataset.kpi ? null : el.dataset.kpi; renderStats(); renderHistory(true); };
@@ -1414,8 +1458,8 @@
 
     const rising = risingStarsInRange();
     document.getElementById('minorStats').innerHTML = `
-      <div class="stat stat--minor stat--clickable" id="risingJump"><span class="stat__label">Rising Stars</span><span class="stat__value">${fmtInt(rising.length)}</span><span class="stat__sub">approved im Zeitraum · zur Liste ↓</span></div>
-      <div class="stat stat--minor"><span class="stat__label">Geblockt</span><span class="stat__value">${fmtInt(cur.blocked)}</span><span class="stat__sub">nur vorher freigegebene Creator · im Zeitraum geblockt</span></div>`;
+      <div class="stat stat--minor stat--clickable" id="risingJump"><span class="stat__label">Rising Stars</span><span class="stat__value">${fmtInt(rising.length)}</span><span class="stat__sub">approved in range · see list ↓</span></div>
+      <div class="stat stat--minor"><span class="stat__label">Blocked</span><span class="stat__value">${fmtInt(cur.blocked)}</span><span class="stat__sub">previously approved creators only · blocked in range</span></div>`;
     document.getElementById('risingJump').addEventListener('click', () => document.getElementById('risingSection').scrollIntoView({ behavior: 'smooth', block: 'start' }));
   }
 
@@ -1569,7 +1613,7 @@
     box.hidden = false;
     const kpi = KPIS.find((k) => k.key === state.openKpi);
     historySeries = new Map(monthlySeries(scopedRows(), kpi.key).map((d) => [d.m, d.v]));
-    document.getElementById('historyTitle').innerHTML = `${kpi.histLabel}<span>${state.countries.size ? [...state.countries].join(', ') : 'Alle Länder'} · Werte je Kalendermonat</span>`;
+    document.getElementById('historyTitle').innerHTML = `${kpi.histLabel}<span>${state.countries.size ? [...state.countries].map(seriesLabel).join(', ') : 'All countries'} · values per calendar month</span>`;
     if (!historyChart) {
       historyChart = MonthChart({
         scrollEl: document.getElementById('historyScroll'),
@@ -1614,7 +1658,7 @@
         tooltip: (m, s) => {
           const tot = barModel.byMonth.get(m).total;
           const pct = tot ? Math.round((s.val / tot) * 1000) / 10 : 0;
-          return `<div class="tt-title">${monthLong(m)}</div><div class="tt-row"><span class="tt-swatch" style="background:${s.color}"></span>${s.label}: <b>${fmtInt(s.val)}</b> (${String(pct).replace('.', ',')}%)</div><div class="tt-row">Gesamt aktiv: ${fmtInt(tot)}</div>`;
+          return `<div class="tt-title">${monthLong(m)}</div><div class="tt-row"><span class="tt-swatch" style="background:${s.color}"></span>${s.label}: <b>${fmtInt(s.val)}</b> (${pct}%)</div><div class="tt-row">Total active: ${fmtInt(tot)}</div>`;
         },
         afterScale: () => drawRisingPin(),
       });
@@ -1637,11 +1681,11 @@
     const total = totals.reduce((a, d) => a + d.value, 0);
     document.getElementById('donutTotal').textContent = fmtInt(total);
     const dimLabel = DIMENSIONS.find((d) => d.key === state.dimension).label;
-    document.getElementById('pieTitle').textContent = `Verteilung nach ${dimLabel} · ${periodText(state.range)}`;
+    document.getElementById('pieTitle').textContent = `Distribution by ${dimLabel.toLowerCase()} · ${periodText(state.range)}`;
     renderLegend(allTotals, grandTotal);
     if (!total) {
       const t = svgEl('text', { x: cx, y: cy, 'text-anchor': 'middle', class: 'axis-label' });
-      t.textContent = 'Keine Daten';
+      t.textContent = 'No data';
       svg.appendChild(t);
       return;
     }
@@ -1702,16 +1746,51 @@
     });
     return out.sort((a, b) => (b.approvedMonth > a.approvedMonth ? 1 : b.approvedMonth < a.approvedMonth ? -1 : a.id.localeCompare(b.id)));
   }
+  // Rising-Star-Quote je Freigabe-Kohorte: Rising Stars ÷ im Monat freigegebene Creator
+  let cohortChart = null, cohortSeries = null;
+  function cohortRates() {
+    const cur = currentMonth();
+    const by = new Map(ALL_MONTHS.map((m) => [m, { n: 0, rs: 0 }]));
+    CREATOR_INFO.forEach((inf) => {
+      if (!inf.approvedMonth || (state.countries.size && !state.countries.has(inf.c))) return;
+      const b = by.get(inf.approvedMonth);
+      if (!b) return;
+      b.n++;
+      if (inf.rising) b.rs++;
+    });
+    // eine Kohorte ist erst fertig, wenn auch der zuletzt Freigegebene seinen vollen ersten Monat hatte
+    return new Map(ALL_MONTHS.map((m) => { const b = by.get(m); const done = addMonths(m, 1) < cur; return [m, { ...b, done, v: done && b.n ? b.rs / b.n : null }]; }));
+  }
+  function renderCohort(scroll) {
+    cohortSeries = cohortRates();
+    document.getElementById('cohortTitle').innerHTML = `Rising star rate by approval month<span>${state.countries.size ? [...state.countries].map(seriesLabel).join(', ') : 'All countries'} · rising stars ÷ creators approved that month</span>`;
+    const open = [...cohortSeries.entries()].filter(([, d]) => !d.done && d.n).map(([m]) => monthLabel(m));
+    document.getElementById('cohortHint').textContent = `Approval dates are reliable from May 2024 onwards${open.length ? ` · not complete yet (first month still running): ${open.join(', ')}` : ''}`;
+    if (!cohortChart) {
+      cohortChart = MonthChart({
+        scrollEl: document.getElementById('cohortScroll'),
+        svg: document.getElementById('cohortChart'),
+        axisSvg: document.getElementById('cohortAxis'),
+        chartH: 150,
+        kind: 'pct',
+        total: (m) => cohortSeries.get(m).v,
+        stack: (m) => [{ key: 'v', val: cohortSeries.get(m).v, color: 'var(--accent)' }],
+        valueLabels: (v) => `${(v * 100).toFixed(1)}%`,
+        tooltip: (m) => { const d = cohortSeries.get(m); return `<div class="tt-title">Approved ${monthLong(m)}</div><div class="tt-row">${fmtInt(d.rs)} of ${fmtInt(d.n)} creators: <b>${fmtVal(d.v, 'pct')}</b></div>`; },
+      });
+    }
+    cohortChart.draw(scroll);
+  }
   function renderRising() {
     const list = risingStarsInRange();
     document.getElementById('risingTitle').textContent = `Rising Stars · ${periodText(state.range)} (${list.length})`;
     const box = document.getElementById('risingList');
-    if (!list.length) { box.innerHTML = '<div class="empty-note">Keine Rising Stars mit Approval im gewählten Zeitraum.</div>'; return; }
-    const dimLabel = DIMENSIONS.find((d) => d.key === state.dimension).label;
+    if (!list.length) { renderCohort(true); box.innerHTML = '<div class="empty-note">No rising stars approved in the selected range.</div>'; return; }
+    renderCohort(true);
     box.innerHTML = list.map((r) => `
       <a class="rising-item" href="${PROFILE_BASE}${r.id}" target="_blank" rel="noopener noreferrer" data-id="${r.id}">
         <span class="rising-item__id">${r.id}</span>
-        <span class="rising-item__meta">X: <b>${monthLabel(r.approvedMonth)}</b> · Y: <b>${seriesLabel(r[state.dimension])}</b> (${dimLabel}) · ${r.c}</span>
+        <span class="rising-item__meta">${[r.g, r.a, r.c].filter((v) => v && v !== 'Unbekannt').map(seriesLabel).join(' · ')} · approved <b>${monthLabel(r.approvedMonth)}</b></span>
       </a>`).join('');
     box.querySelectorAll('.rising-item').forEach((el) => {
       el.addEventListener('mouseenter', () => focusRising(el.dataset.id));
@@ -1760,7 +1839,7 @@
     renderRising();
   }
   let resizeT = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (ROWS.length) { renderBarChart(true); renderHistory(true); } }, 150); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (ROWS.length) { renderBarChart(true); renderHistory(true); renderCohort(false); } }, 150); });
 
   async function init() {
     const sourcePill = document.getElementById('sourcePill');
@@ -1768,28 +1847,28 @@
     const banner = document.getElementById('statusBanner');
     document.getElementById('sheetLink').href = SHEET_EDIT_URL;
     try {
-      if (!params.get('creators') && CREATORS_GID.startsWith('HIER')) throw new Error('Die gid des Creators-Tabs ist noch nicht eingetragen (CREATORS_GID in index.html)');
+      if (!params.get('creators') && CREATORS_GID.startsWith('HIER')) throw new Error('The gid of the creators tab is not set yet (CREATORS_GID in index.html)');
       const load = async (url, name) => {
         const res = await fetch(url, { cache: 'no-store' });
         if (!res.ok) throw new Error(`Tab „${name}“: HTTP ${res.status}`);
         const text = await res.text();
-        if (/^\s*<(!doctype|html)/i.test(text)) throw new Error('Google liefert eine Anmeldeseite statt CSV – bitte das Sheet für „Jeder mit dem Link: Betrachter“ freigeben');
+        if (/^\s*<(!doctype|html)/i.test(text)) throw new Error('Google returned a sign-in page instead of CSV – please share the sheet as "Anyone with the link: Viewer"');
         return parseCsv(text);
       };
       const [cTable, aTable] = await Promise.all([load(CREATORS_CSV_URL, 'Creators'), load(ACTIVITY_CSV_URL, 'Activity')]);
       const { rows, info } = ingest(cTable, aTable);
-      if (!rows.length) throw new Error('Keine gültigen Monatszeilen im Sheet');
+      if (!rows.length) throw new Error('No valid month rows in the sheet');
       ROWS = rows;
       CREATOR_INFO = info;
       rebuildDerived();
-      sourcePill.textContent = 'Live aus Google Sheet';
-      updatedNote.textContent = `Stand: ${new Date().toLocaleString('de-DE')}`;
+      sourcePill.textContent = 'Live from Google Sheet';
+      updatedNote.textContent = `Updated ${new Date().toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}`;
       renderAll(true);
     } catch (err) {
-      console.warn('Live-Daten konnten nicht geladen werden:', err);
-      sourcePill.textContent = 'Keine Live-Daten';
+      console.warn('Could not load live data:', err);
+      sourcePill.textContent = 'No live data';
       banner.hidden = false;
-      banner.textContent = 'Die Daten konnten nicht aus dem Google Sheet geladen werden: ' + err.message;
+      banner.textContent = 'Could not load data from the Google Sheet: ' + err.message;
     }
   }
   init();
