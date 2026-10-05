@@ -1479,9 +1479,11 @@
   // Layout: Slot-Breite so, dass der gewählte Zeitraum den sichtbaren Bereich füllt.
   function slotLayout(scrollEl) {
     const viewW = Math.max(scrollEl.clientWidth, 280);
+    // wie im Sales-Dashboard: mindestens 12 Monate sichtbar, Balken max. 58 px
     const len = monthDiff(state.range.from, state.range.to) + 1;
-    const slot = Math.max(30, Math.min(220, (viewW - 12) / len));
-    return { slot, barW: Math.max(14, Math.min(72, slot * 0.58)), viewW };
+    const visible = Math.min(Math.max(len, 12), Math.max(ALL_MONTHS.length, 1));
+    const slot = Math.max(30, Math.min(120, (viewW - 12) / visible));
+    return { slot, barW: Math.max(12, Math.min(58, slot * 0.74)), viewW };
   }
 
   // Erzeugt einen Monats-Chart; getStack(m) liefert [{key,val,color,label}] (von unten nach oben)
@@ -1580,7 +1582,9 @@
       });
 
       if (scrollToRange !== false) {
-        const target = pad + idxFrom * layout.slot - Math.max(0, (layout.viewW - (idxTo - idxFrom + 1) * layout.slot) / 2);
+        // gewählten Zeitraum rechtsbündig zeigen, davor die Vormonate als Kontext
+        const rangeW = (idxTo - idxFrom + 1) * layout.slot;
+        const target = rangeW >= layout.viewW - pad * 2 ? pad + idxFrom * layout.slot : pad + (idxTo + 1) * layout.slot - layout.viewW + pad * 2;
         scrollEl.style.scrollBehavior = 'auto';
         scrollEl.scrollLeft = Math.max(0, target);
         scrollEl.style.scrollBehavior = '';
