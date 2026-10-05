@@ -830,6 +830,7 @@
   .rising__head h2 { margin: 0; font-family: var(--font-display); font-size: 18px; }
   .rising__head p { margin: 0; font-size: 12px; color: var(--ink-muted); }
   .cohort { display: flex; flex-direction: column; gap: 8px; }
+  .rising-item__id.rising-item__id--name { font-family: var(--font-body); font-size: 13px; font-weight: 600; }
   /* ---------- kompakte Filterleiste ---------- */
   .panel--filters { padding: 12px 16px; gap: 10px; box-shadow: none; }
   .panel--filters .period-bar { gap: 10px 24px; align-items: flex-start; }
@@ -1191,13 +1192,14 @@
     const header = table[hRow].map(clean);
     const col = {};
     required.forEach((k) => { col[k] = header.indexOf(k); });
-    const missing = required.filter((k) => col[k] === -1 && k !== 'paid_commissions');
+    const optional = ['paid_commissions', 'creator_name'];
+    const missing = required.filter((k) => col[k] === -1 && !optional.includes(k));
     if (missing.length) throw new Error(`Tab "${name}": missing columns: ${missing.join(', ')}`);
     return { body: table.slice(hRow + 1), col };
   }
 
   function ingest(creatorsTable, activityTable) {
-    const C = headerTable(creatorsTable, 'Creators', ['creator_id', 'country', 'gender', 'age_group', 'approved_month', 'blocked_month', 'is_rising_star']);
+    const C = headerTable(creatorsTable, 'Creators', ['creator_id', 'country', 'gender', 'age_group', 'approved_month', 'blocked_month', 'is_rising_star', 'creator_name']);
     const A = headerTable(activityTable, 'Activity', ['creator_id', 'month', 'total_applications', 'successful_applications', 'commissions', 'paid_commissions', 'payout_eur']);
 
     const info = new Map();
@@ -1212,6 +1214,7 @@
         approvedMonth: parseMonth(r[C.col.approved_month]),
         blockedMonth: parseMonth(r[C.col.blocked_month]),
         rising: flag(r[C.col.is_rising_star]),
+        name: C.col.creator_name === -1 ? '' : (r[C.col.creator_name] || '').trim(),
       });
     }
 
@@ -1785,6 +1788,7 @@
     }
     cohortChart.draw(scroll);
   }
+  function escapeHtml(t) { return String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]); }
   function renderRising() {
     const list = risingStarsInRange();
     document.getElementById('risingTitle').textContent = `Rising Stars · ${periodText(state.range)} (${list.length})`;
@@ -1793,7 +1797,7 @@
     renderCohort(true);
     box.innerHTML = list.map((r) => `
       <a class="rising-item" href="${PROFILE_BASE}${r.id}" target="_blank" rel="noopener noreferrer" data-id="${r.id}">
-        <span class="rising-item__id">${r.id}</span>
+        <span class="rising-item__id${r.name ? ' rising-item__id--name' : ''}" title="${r.id}">${r.name ? escapeHtml(r.name) : r.id}</span>
         <span class="rising-item__meta">${[r.g, r.a, r.c].filter((v) => v && v !== 'Unbekannt').map(seriesLabel).join(' · ')} · approved <b>${monthLabel(r.approvedMonth)}</b></span>
       </a>`).join('');
     box.querySelectorAll('.rising-item').forEach((el) => {
