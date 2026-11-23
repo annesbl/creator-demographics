@@ -830,6 +830,30 @@
   .rising__head h2 { margin: 0; font-family: var(--font-display); font-size: 18px; }
   .rising__head p { margin: 0; font-size: 12px; color: var(--ink-muted); }
   .cohort { display: flex; flex-direction: column; gap: 8px; }
+  .seats__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 14px 24px; flex-wrap: wrap; }
+  .seats__head h2 { margin: 0; font-family: var(--font-display); font-size: 18px; }
+  .seats__head p { margin: 2px 0 0; font-size: 12px; color: var(--ink-muted); }
+  .seats__controls { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: flex-end; }
+  .seats__controls .control-group { gap: 4px; }
+  .seats__controls .control-group__label { font-size: 10px; }
+  .segmented--select { position: relative; padding: 3px; }
+  .segmented--select::after { content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; font-size: 10px; color: var(--ink-secondary); }
+  .segmented--select select { appearance: none; -webkit-appearance: none; cursor: pointer; border: 0; background: transparent; padding: 7px 32px 7px 14px; border-radius: 9999px; font: 600 12.5px var(--font-body); color: var(--ink-secondary); outline: none; }
+  .segmented--select select:hover, .segmented--select select:focus { color: var(--ink); }
+  .seats__kpis { display: flex; gap: 10px 40px; flex-wrap: wrap; }
+  .seats__kpi { display: flex; flex-direction: column; gap: 2px; }
+  .seats__kpi-label { font-size: 12.5px; color: var(--ink-secondary); }
+  .seats__kpi-value { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+  .seats__kpi-sub { font-size: 11.5px; color: var(--ink-muted); }
+  .seats__table-wrap { max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; }
+  .seats__table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+  .seats__table th, .seats__table td { padding: 8px 14px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .seats__table th:first-child, .seats__table td:first-child { text-align: left; }
+  .seats__table thead th { position: sticky; top: 0; background: var(--surface); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-muted); }
+  .seats__table tr.is-partial td { color: var(--ink-muted); font-style: italic; }
+  .seats__delta-up { color: #2f8a4c; }
+  .seats__delta-down { color: #c2453d; }
+  .seat-bar--partial { opacity: 0.4; }
   .pyramid { border-top: 1px solid var(--border); padding-top: 18px; display: flex; flex-direction: column; gap: 10px; }
   .pyramid__head h3 { margin: 0; font-size: 15px; font-weight: 700; }
   .pyramid__head p { margin: 2px 0 0; font-size: 12px; color: var(--ink-muted); }
@@ -921,6 +945,18 @@
     .stats--kpi { grid-template-columns: 1fr; }
     .wrap { padding: 20px 16px 48px; }
   }
+  /* ---------- erklärende Texte: klein und dezent ---------- */
+  .stat__sub, .stats--kpi .stat__sub, .stat--minor .stat__sub, .seats__kpi-sub, .seats__head p, .rising__head p,
+  .pyramid__head p, .history__title span, .scroll-hint, .cal-hint, .panel--filters .cal-hint, .period-current small, .panel--filters .period-current small, .empty-note {
+    font-size: 9px; font-style: normal; font-weight: 400; color: var(--ink-muted); opacity: 0.5;
+  }
+  /* mehr Luft zwischen Überschrift und Zahl */
+  .seats__kpi-label, .stats--kpi .stat__label { margin-bottom: 4px; font-size: 14.5px; }
+  /* Umrandung um die KPI-Kacheln */
+  .stats--kpi .stat, .stats--kpi .stat:hover, .stats--kpi .stat.is-open { background: transparent; }
+  .stats--kpi .stat { border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+  .stats--kpi .stat:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+  .stats--kpi .stat.is-open { border-color: var(--accent); box-shadow: inset 0 0 0 0.5px var(--accent); }
 </style>
 
 <div class="wrap">
@@ -1037,6 +1073,45 @@
     </div>
   </section>
 
+  <section class="panel seats" id="seatsSection">
+    <div class="seats__head">
+      <div>
+        <h2>Seats booked</h2>
+        <p>All seats booked on Speekly per month or quarter</p>
+      </div>
+      <div class="seats__controls">
+        <div class="control-group">
+          <label class="control-group__label" for="seatsMarket">Market</label>
+          <div class="segmented segmented--select"><select id="seatsMarket"></select></div>
+        </div>
+        <div class="control-group">
+          <span class="control-group__label">View</span>
+          <div class="segmented" id="seatsView">
+            <button type="button" data-view="month" class="active">Monthly</button>
+            <button type="button" data-view="quarter">Quarterly</button>
+          </div>
+        </div>
+        <div class="control-group">
+          <span class="control-group__label">Show</span>
+          <div class="segmented" id="seatsMode">
+            <button type="button" data-mode="chart" class="active">Chart</button>
+            <button type="button" data-mode="table">Table</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="seats__kpis" id="seatsKpis"></div>
+    <div id="seatsChartWrap">
+      <div class="chart-frame">
+        <svg class="y-axis" id="seatsAxis"></svg>
+        <div class="chart-scroll" id="seatsScroll"><svg id="seatsChart"></svg></div>
+      </div>
+      <span class="scroll-hint" id="seatsHint"></span>
+    </div>
+    <div class="seats__table-wrap" id="seatsTableWrap" hidden></div>
+    <div class="empty-note" id="seatsError" hidden></div>
+  </section>
+
   <section class="panel rising" id="risingSection">
     <div class="rising__head">
       <h2 id="risingTitle">Rising Stars</h2>
@@ -1067,6 +1142,8 @@
   const csvUrl = (gid) => `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
   const CREATORS_CSV_URL = params.get('creators') || csvUrl(CREATORS_GID);
   const ACTIVITY_CSV_URL = params.get('activity') || csvUrl(ACTIVITY_GID);
+  const SEATS_GID = '1371923376';            // Tab mit gebuchten Seats je Monat und Markt (BigQuery, täglich)
+  const SEATS_CSV_URL = params.get('seats') || csvUrl(SEATS_GID);
   const PROFILE_BASE = 'https://speekly.io/creator-management/';
   const DEFAULT_MONTHS = 3;
 
@@ -1115,9 +1192,9 @@
   };
 
   // ---------- Helpers ----------
-  const fmtIntF = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
-  const fmtDecF = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const fmtPctF = new Intl.NumberFormat('en-GB', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtIntF = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+  const fmtDecF = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtPctF = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   function fmtInt(n) { return fmtIntF.format(Math.round(n)); }
   function fmtVal(v, kind) {
     if (v == null || Number.isNaN(v)) return '–';
@@ -1697,7 +1774,7 @@
         valueLabels: (v) => fmtInt(v),
         tooltip: (m, s) => {
           const tot = barModel.byMonth.get(m).total;
-          const pct = tot ? Math.round((s.val / tot) * 1000) / 10 : 0;
+          const pct = tot ? fmtPctF.format((s.val / tot) * 100) : '0,0';
           return `<div class="tt-title">${monthLong(m)}</div><div class="tt-row"><span class="tt-swatch" style="background:${s.color}"></span>${s.label}: <b>${fmtInt(s.val)}</b> (${pct}%)</div><div class="tt-row">Total active: ${fmtInt(tot)}</div>`;
         },
         afterScale: () => drawRisingPin(),
@@ -1740,6 +1817,176 @@
     }).join('');
   }
 
+  // ---------- Seats booked (eigener Tab: monat, markt, seats) ----------
+  const SEATS_MARKETS = [
+    { key: 'Alle', label: 'All markets' }, { key: 'de', label: 'Germany' }, { key: 'it', label: 'Italy' },
+    { key: 'nl', label: 'Netherlands' }, { key: 'en', label: 'UK/English' }, { key: 'fr', label: 'France' }, { key: 'es', label: 'Spain' },
+  ];
+  const seatsState = { market: 'Alle', view: 'month', mode: 'chart', byMarket: null };
+
+  async function loadSeats() {
+    const err = document.getElementById('seatsError');
+    try {
+      const res = await fetch(SEATS_CSV_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const table = parseCsv(await res.text());
+      const header = (table[0] || []).map(clean);
+      const iM = header.indexOf('monat'), iK = header.indexOf('markt'), iS = header.indexOf('seats');
+      if (iM === -1 || iK === -1 || iS === -1) throw new Error('expected columns monat, markt, seats');
+      const byMarket = new Map();
+      table.slice(1).forEach((r) => {
+        const m = parseMonth(r[iM]);
+        const k = (r[iK] || '').trim();
+        if (!m || !k) return;
+        if (!byMarket.has(k)) byMarket.set(k, new Map());
+        byMarket.get(k).set(m, (byMarket.get(k).get(m) || 0) + parseNum(r[iS]));
+      });
+      seatsState.byMarket = byMarket;
+      renderSeats(true);
+    } catch (e) {
+      console.warn('Could not load seats:', e);
+      err.hidden = false;
+      err.textContent = 'Seats could not be loaded from the Google Sheet: ' + e.message;
+      document.getElementById('seatsChartWrap').hidden = true;
+    }
+  }
+
+  // Perioden-Reihe für Markt + Ansicht: [{key, label, value, partial}]
+  function seatsSeries() {
+    const all = seatsState.byMarket.get('Alle') || new Map();
+    const months = [...all.keys()].sort();
+    if (!months.length) return [];
+    const data = seatsState.byMarket.get(seatsState.market) || new Map();
+    const cur = currentMonth();
+    const full = [];
+    for (let m = months[0]; m <= months[months.length - 1]; m = addMonths(m, 1)) full.push(m);
+    if (seatsState.view === 'month') {
+      return full.map((m) => ({ key: m, label: monthLabel(m), long: monthLong(m), value: data.get(m) || 0, partial: m >= cur }));
+    }
+    const q = new Map();
+    full.forEach((m) => {
+      const [y, mo] = m.split('-').map(Number);
+      const key = `${y}-Q${Math.ceil(mo / 3)}`;
+      const e = q.get(key) || { key, label: `Q${Math.ceil(mo / 3)} ${String(y).slice(2)}`, long: `Q${Math.ceil(mo / 3)} ${y}`, value: 0, months: 0, partial: false };
+      e.value += data.get(m) || 0;
+      e.months++;
+      if (m >= cur) e.partial = true;
+      q.set(key, e);
+    });
+    // Quartale, die in den Daten nicht vollständig vorkommen (z. B. erster), gelten als unvollständig
+    return [...q.values()].map((e) => ({ ...e, partial: e.partial || e.months < 3 }));
+  }
+
+  function seatsDelta(cur, prev) {
+    if (!prev || prev.partial || cur.partial || !prev.value) return null;
+    return (cur.value - prev.value) / prev.value;
+  }
+  function seatsDeltaHtml(d) {
+    if (d == null) return '<span class="stat__delta flat">–</span>';
+    const cls = Math.abs(d) < 0.0005 ? 'flat' : d > 0 ? 'up' : 'down';
+    return `<span class="stat__delta ${cls}">${d >= 0 ? '▲' : '▼'} ${d >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(d) * 100)}%</span>`;
+  }
+
+  function renderSeatsControls() {
+    const sel = document.getElementById('seatsMarket');
+    if (!sel.options.length) {
+      const present = new Set(seatsState.byMarket.keys());
+      sel.innerHTML = SEATS_MARKETS.filter((m) => present.has(m.key)).map((m) => `<option value="${m.key}">${m.label}</option>`).join('');
+      sel.onchange = () => { seatsState.market = sel.value; renderSeats(true); };
+      document.querySelectorAll('#seatsView button').forEach((b) => b.addEventListener('click', () => { seatsState.view = b.dataset.view; renderSeats(true); }));
+      document.querySelectorAll('#seatsMode button').forEach((b) => b.addEventListener('click', () => { seatsState.mode = b.dataset.mode; renderSeats(true); }));
+    }
+    sel.value = seatsState.market;
+    document.querySelectorAll('#seatsView button').forEach((b) => b.classList.toggle('active', b.dataset.view === seatsState.view));
+    document.querySelectorAll('#seatsMode button').forEach((b) => b.classList.toggle('active', b.dataset.mode === seatsState.mode));
+  }
+
+  function renderSeats(scroll) {
+    if (!seatsState.byMarket) return;
+    renderSeatsControls();
+    const series = seatsSeries();
+    const isQ = seatsState.view === 'quarter';
+    const unit = isQ ? 'quarter' : 'month';
+    const done = series.filter((e) => !e.partial);
+    const last = done[done.length - 1], prevLast = done[done.length - 2];
+    const running = series.find((e) => e.partial && series.indexOf(e) === series.length - 1);
+    const kpi = (label, value, sub) => `<div class="seats__kpi"><span class="seats__kpi-label">${label}</span><span class="seats__kpi-value">${value}</span><span class="seats__kpi-sub">${sub}</span></div>`;
+    document.getElementById('seatsKpis').innerHTML =
+      (last ? kpi(`Last full ${unit}`, fmtInt(last.value), `${seatsDeltaHtml(seatsDelta(last, prevLast))} vs. ${isQ ? 'previous quarter' : 'previous month'}`) : '') +
+      (running ? kpi(`Current ${unit} so far`, fmtInt(running.value), 'still running') : '') +
+      kpi('Total since start', fmtInt(series.reduce((a, e) => a + e.value, 0)), `${series[0] ? series[0].long : ''} until today`);
+
+    const showTable = seatsState.mode === 'table';
+    document.getElementById('seatsChartWrap').hidden = showTable;
+    document.getElementById('seatsTableWrap').hidden = !showTable;
+    document.getElementById('seatsHint').textContent = `Scroll left for older ${unit}s`;
+
+    if (showTable) {
+      const rows = series.map((e, i) => {
+        const d = seatsDelta(e, series[i - 1]);
+        const dTxt = d == null ? '–' : `<span class="${d > 0 ? 'seats__delta-up' : d < 0 ? 'seats__delta-down' : ''}">${d >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(d) * 100)}%</span>`;
+        return `<tr class="${e.partial ? 'is-partial' : ''}"><td>${e.long}${e.partial ? ' (running)' : ''}</td><td>${fmtInt(e.value)}</td><td>${dTxt}</td></tr>`;
+      }).reverse().join('');
+      document.getElementById('seatsTableWrap').innerHTML = `<table class="seats__table"><thead><tr><th>${isQ ? 'Quarter' : 'Month'}</th><th>Seats</th><th>vs. previous ${unit}</th></tr></thead><tbody>${rows}</tbody></table>`;
+      return;
+    }
+    drawSeatsChart(series, scroll);
+  }
+
+  function drawSeatsChart(series, scroll) {
+    const scrollEl = document.getElementById('seatsScroll');
+    const svg = document.getElementById('seatsChart');
+    const axisSvg = document.getElementById('seatsAxis');
+    const chartH = 220, topPad = 22, bottomPad = 30, pad = 6;
+    const viewW = Math.max(scrollEl.clientWidth, 280);
+    const visible = Math.min(Math.max(12, Math.round(viewW / 75)), Math.max(series.length, 1));
+    const slot = Math.max(30, (viewW - 12) / visible);
+    const barW = Math.max(12, Math.min(58, slot * 0.74));
+    const width = Math.max(pad * 2 + series.length * slot, viewW);
+    const { max, step } = niceScale(Math.max(1, ...series.map((e) => e.value)) * 1.08);
+    const yOf = (v) => topPad + chartH - (v / max) * chartH;
+    svg.innerHTML = '';
+    svg.setAttribute('width', width);
+    svg.setAttribute('height', chartH + topPad + bottomPad);
+    axisSvg.innerHTML = '';
+    axisSvg.setAttribute('width', 46);
+    axisSvg.setAttribute('height', chartH + topPad + bottomPad);
+    for (let v = 0; v <= max + 1e-9; v += step) {
+      svg.appendChild(svgEl('line', { x1: 0, x2: width, y1: yOf(v), y2: yOf(v), class: 'grid-line' }));
+      const t = svgEl('text', { x: 40, y: yOf(v) + 3, class: 'axis-label', 'text-anchor': 'end' });
+      t.textContent = axisFmt(v, 'int');
+      axisSvg.appendChild(t);
+    }
+    const labelEvery = Math.max(1, Math.ceil(44 / slot));
+    series.forEach((e, i) => {
+      const x = pad + i * slot + (slot - barW) / 2;
+      const h = (e.value / max) * chartH;
+      const rect = svgEl('rect', { x, y: yOf(e.value), width: barW, height: Math.max(0, h), rx: 3, fill: 'var(--accent)', class: 'seg' + (e.partial ? ' seat-bar--partial' : '') });
+      const d = seatsDelta(e, series[i - 1]);
+      const tip = `<div class="tt-title">${e.long}${e.partial ? ' (running)' : ''}</div><div class="tt-row">Seats: <b>${fmtInt(e.value)}</b></div>` +
+        (d == null ? '' : `<div class="tt-row">vs. previous ${seatsState.view === 'quarter' ? 'quarter' : 'month'}: ${d >= 0 ? '+' : '−'}${fmtPctF.format(Math.abs(d) * 100)}%</div>`);
+      rect.addEventListener('mouseenter', (ev) => showTooltip(barTooltip, ev.clientX, ev.clientY, tip));
+      rect.addEventListener('mousemove', (ev) => moveTooltip(barTooltip, ev));
+      rect.addEventListener('mouseleave', () => hideTooltip(barTooltip));
+      svg.appendChild(rect);
+      if (slot >= 44 && e.value > 0) {
+        const t = svgEl('text', { x: x + barW / 2, y: yOf(e.value) - 5, class: 'value-label', 'text-anchor': 'middle' });
+        t.textContent = fmtInt(e.value);
+        svg.appendChild(t);
+      }
+      if (i % labelEvery === 0 || i === series.length - 1) {
+        const t = svgEl('text', { x: x + barW / 2, y: topPad + chartH + 18, class: 'axis-label', 'text-anchor': 'middle' });
+        t.textContent = e.label;
+        svg.appendChild(t);
+      }
+    });
+    if (scroll !== false) {
+      scrollEl.style.scrollBehavior = 'auto';
+      scrollEl.scrollLeft = scrollEl.scrollWidth;
+      scrollEl.style.scrollBehavior = '';
+    }
+  }
+
   function renderDonut() {
     const svg = document.getElementById('donutChart');
     svg.innerHTML = '';
@@ -1774,7 +2021,7 @@
       const large = a1 - a0 > Math.PI ? 1 : 0;
       const p = (r, a) => `${cx + r * Math.cos(a)} ${cy + r * Math.sin(a)}`;
       const path = svgEl('path', { d: `M ${p(rOuter, a0)} A ${rOuter} ${rOuter} 0 ${large} 1 ${p(rOuter, a1)} L ${p(rInner, a1)} A ${rInner} ${rInner} 0 ${large} 0 ${p(rInner, a0)} Z`, fill: d.color, class: 'seg' });
-      const pct = String(Math.round(frac * 1000) / 10);
+      const pct = fmtPctF.format(frac * 100);
       path.addEventListener('mouseenter', (e) => showTooltip(pieTooltip, e.clientX, e.clientY, `<div class="tt-title">${d.label}</div><div class="tt-row"><span class="tt-swatch" style="background:${d.color}"></span><b>${fmtInt(d.value)}</b> (${pct}%)</div>`));
       path.addEventListener('mousemove', (e) => moveTooltip(pieTooltip, e));
       path.addEventListener('mouseleave', () => hideTooltip(pieTooltip));
@@ -1790,7 +2037,7 @@
   function renderLegend(totals, grandTotal) {
     const legend = document.getElementById('legend');
     legend.innerHTML = totals.map((d) => {
-      const pct = grandTotal ? String(Math.round((d.value / grandTotal) * 1000) / 10) : 0;
+      const pct = grandTotal ? fmtPctF.format((d.value / grandTotal) * 100) : '0,0';
       return `<div class="legend__row" data-key="${d.key}" ${d.hidden ? 'style="opacity:.4"' : ''} title="Klicken zum Ein-/Ausblenden">
         <span class="legend__left"><span class="legend__swatch" style="background:${d.color}"></span><span class="legend__name">${d.label}</span></span>
         <span class="legend__val">${fmtInt(d.value)} · ${pct}%</span></div>`;
@@ -1875,7 +2122,7 @@
         kind: 'pct',
         total: (m) => cohortSeries.get(m).v,
         stack: (m) => [{ key: 'v', val: cohortSeries.get(m).v, color: 'var(--accent)' }],
-        valueLabels: (v) => `${(v * 100).toFixed(1)}%`,
+        valueLabels: (v) => `${fmtPctF.format(v * 100)}%`,
         tooltip: (m) => { const d = cohortSeries.get(m); return `<div class="tt-title">Approved ${monthLong(m)}</div><div class="tt-row">${fmtInt(d.rs)} of ${fmtInt(d.n)} creators: <b>${fmtVal(d.v, 'pct')}</b></div>`; },
       });
     }
@@ -1941,13 +2188,14 @@
     renderRising();
   }
   let resizeT = null;
-  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (ROWS.length) { renderBarChart(true); renderHistory(true); renderCohort(false); } }, 150); });
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (ROWS.length) { renderBarChart(true); renderHistory(true); renderCohort(false); } if (seatsState.byMarket) renderSeats(false); }, 150); });
 
   async function init() {
     const sourcePill = document.getElementById('sourcePill');
     const updatedNote = document.getElementById('updatedNote');
     const banner = document.getElementById('statusBanner');
     document.getElementById('sheetLink').href = SHEET_EDIT_URL;
+    loadSeats();
     try {
       if (!params.get('creators') && CREATORS_GID.startsWith('HIER')) throw new Error('The gid of the creators tab is not set yet (CREATORS_GID in index.html)');
       const load = async (url, name) => {
